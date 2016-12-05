@@ -1,98 +1,90 @@
 import reduce from 'lodash/reduce';
 
-export default (http, saveJWTToken, getUserId, onLogout = () => {}) => ({
-	createSession: (username, password) => (
-		http.post('/authorization/token', { username, password })
-			.then((json) => {
-				saveJWTToken(json.token);
-				return json;
-			})
-	),
+export default http => ({
+	createSession: (username, password) =>
+        http.post('/authorization/token', { username, password }),
 
 	destroySession: () =>
-		http.del('/authorization/token')
-			.then(() => {
-				onLogout();
-			}),
+		http.del('/authorization/token'),
 
 	getTranslations: locale =>
 		http.getUnauthenticated(`/translations/${locale}`),
 
-	getFaxlines: () =>
-		http.get(`/${getUserId()}/faxlines`),
+	getFaxlines: userId =>
+		http.get(`/${userId}/faxlines`),
 
-	getFaxlineNumbers: faxlineId =>
-		http.get(`/${getUserId()}/faxlines/${faxlineId}/numbers`),
+	getFaxlineNumbers: (userId, faxlineId) =>
+		http.get(`/${userId}/faxlines/${faxlineId}/numbers`),
 
-	setFaxlineAlias: (faxlineId, alias) =>
-		http.put(`/${getUserId()}/faxlines/${faxlineId}`, { alias }),
+	setFaxlineAlias: (userId, faxlineId, alias) =>
+		http.put(`/${userId}/faxlines/${faxlineId}`, { alias }),
 
-	setFaxlineTagline: (faxlineId, tagline) =>
-		http.put(`/${getUserId()}/faxlines/${faxlineId}/tagline`, { value: tagline }),
+	setFaxlineTagline: (userId, faxlineId, tagline) =>
+		http.put(`/${userId}/faxlines/${faxlineId}/tagline`, { value: tagline }),
 
-	getFaxlineCallerId: faxlineId =>
-		http.get(`/${getUserId()}/faxlines/${faxlineId}/callerid`),
+	getFaxlineCallerId: (userId, faxlineId) =>
+		http.get(`/${userId}/faxlines/${faxlineId}/callerid`),
 
-	setFaxlineCallerId: (faxlineId, callerId) =>
-		http.put(`/${getUserId()}/faxlines/${faxlineId}/callerid`, { value: callerId }),
+	setFaxlineCallerId: (userId, faxlineId, callerId) =>
+		http.put(`/${userId}/faxlines/${faxlineId}/callerid`, { value: callerId }),
 
-	getPhonelines: () =>
-		http.get(`/${getUserId()}/phonelines`),
+	getPhonelines: userId =>
+		http.get(`/${userId}/phonelines`),
 
-	setPhonelineAlias: (phonelineId, alias) =>
-		http.put(`/${getUserId()}/phonelines/${phonelineId}`, { alias }),
+	setPhonelineAlias: (userId, phonelineId, alias) =>
+		http.put(`/${userId}/phonelines/${phonelineId}`, { alias }),
 
-	getPhonelineDevices: phonelineId =>
-		http.get(`/${getUserId()}/phonelines/${phonelineId}/devices`),
+	getPhonelineDevices: (userId, phonelineId) =>
+		http.get(`/${userId}/phonelines/${phonelineId}/devices`),
 
-	getPhonelineForwardings: phonelineId =>
-		http.get(`/${getUserId()}/phonelines/${phonelineId}/forwardings`),
+	getPhonelineForwardings: (userId, phonelineId) =>
+		http.get(`/${userId}/phonelines/${phonelineId}/forwardings`),
 
-	getPhonelineNumbers: phonelineId =>
-		http.get(`/${getUserId()}/phonelines/${phonelineId}/numbers`),
+	getPhonelineNumbers: (userId, phonelineId) =>
+		http.get(`/${userId}/phonelines/${phonelineId}/numbers`),
 
-	getPhonelineParallelforwardings: phonelineId =>
-		http.get(`/${getUserId()}/phonelines/${phonelineId}/parallelforwardings`),
+	getPhonelineParallelforwardings: (userId, phonelineId) =>
+		http.get(`/${userId}/phonelines/${phonelineId}/parallelforwardings`),
 
-	createPhonelineParallelforwarding: (phonelineId, alias, destination) =>
-		http.post(`/${getUserId()}/phonelines/${phonelineId}/parallelforwardings`, { alias, destination, active: true }),
+	createPhonelineParallelforwarding: (userId, phonelineId, alias, destination) =>
+		http.post(`/${userId}/phonelines/${phonelineId}/parallelforwardings`, { alias, destination, active: true }),
 
-	setPhonelineParallelforwarding: (phonelineId, parallelforwardingId, parallelforwarding) =>
-		http.put(`/${getUserId()}/phonelines/${phonelineId}/parallelforwardings/${parallelforwardingId}`,parallelforwarding),
+	setPhonelineParallelforwarding: (userId, phonelineId, parallelforwardingId, parallelforwarding) =>
+		http.put(`/${userId}/phonelines/${phonelineId}/parallelforwardings/${parallelforwardingId}`, parallelforwarding),
 
-	getPhonelineVoicemails: phonelineId =>
-		http.get(`/${getUserId()}/phonelines/${phonelineId}/voicemails`),
+	getPhonelineVoicemails: (userId, phonelineId) =>
+		http.get(`/${userId}/phonelines/${phonelineId}/voicemails`),
 
-	getPhonelineVoicemailGreetings: (phonelineId, voicemailId) =>
-		http.get(`/${getUserId()}/phonelines/${phonelineId}/voicemails/${voicemailId}/greetings`),
+	getPhonelineVoicemailGreetings: (userId, phonelineId, voicemailId) =>
+		http.get(`/${userId}/phonelines/${phonelineId}/voicemails/${voicemailId}/greetings`),
 
-	setVoicemail: (phonelineId, voicemailId, active, timeout, transcription) =>
+	setVoicemail: (userId, phonelineId, voicemailId, active, timeout, transcription) =>
 		http.put(
-			`/${getUserId()}/phonelines/${phonelineId}/voicemails/${voicemailId}`,
+			`/${userId}/phonelines/${phonelineId}/voicemails/${voicemailId}`,
 			{ timeout, active, transcription },
 		),
 
-	getUser: () =>
-		http.get(`/users/${getUserId()}`),
+	getUser: userId =>
+		http.get(`/users/${userId}`),
 
-	activateGreeting: (phonelineId, voicemailId, greetingId) =>
+	activateGreeting: (userId, phonelineId, voicemailId, greetingId) =>
 		http.put(
-			`/${getUserId()}/phonelines/${phonelineId}/voicemails/${voicemailId}/greetings/${greetingId}`,
+			`/${userId}/phonelines/${phonelineId}/voicemails/${voicemailId}/greetings/${greetingId}`,
 			{ active: true },
 		),
 
-	createGreeting: (phonelineId, voicemailId, filename, base64Content) =>
+	createGreeting: (userId, phonelineId, voicemailId, filename, base64Content) =>
 		http.post(
-			`/${getUserId()}/phonelines/${phonelineId}/voicemails/${voicemailId}/greetings`,
+			`/${userId}/phonelines/${phonelineId}/voicemails/${voicemailId}/greetings`,
 			{ filename, base64Content },
 		),
 
-	deleteGreeting: (phonelineId, voicemailId, greetingId) =>
-		http.del(`/${getUserId()}/phonelines/${phonelineId}/voicemails/${voicemailId}/greetings/${greetingId}`),
+	deleteGreeting: (userId, phonelineId, voicemailId, greetingId) =>
+		http.del(`/${userId}/phonelines/${phonelineId}/voicemails/${voicemailId}/greetings/${greetingId}`),
 
-	changeForwarding: (phonelineId, forwardings) =>
+	changeForwarding: (userId, phonelineId, forwardings) =>
 		http.put(
-			`/${getUserId()}/phonelines/${phonelineId}/forwardings`,
+			`/${userId}/phonelines/${phonelineId}/forwardings`,
 			{ forwardings },
 		),
 
@@ -117,16 +109,16 @@ export default (http, saveJWTToken, getUserId, onLogout = () => {}) => ({
 	fetchLinks: () =>
 		http.get('/app/links'),
 
-	getHistory: (phonelineId, types, directions, limit) => {
-		let url = `/${getUserId()}/history?phonelineId=${phonelineId}&limit=${limit}`;
+	getHistory: (userId, phonelineId, types, directions, limit) => {
+		let url = `/${userId}/history?phonelineId=${phonelineId}&limit=${limit}`;
 		url += reduce(types, (joined, type) => `${joined}&types=${type}`, '');
 		url += reduce(directions, (joined, direction) => `${joined}&directions=${direction}`, '');
 
 		return http.get(url);
 	},
 
-	deleteHistoryEntry: id =>
-		http.del(`/${getUserId()}/history/${id}`),
+	deleteHistoryEntry: (userId, id) =>
+		http.del(`/${userId}/history/${id}`),
 
 	getEvents: () =>
 		http.get('/app/events'),
@@ -167,11 +159,11 @@ export default (http, saveJWTToken, getUserId, onLogout = () => {}) => ({
 	initiateClickToDial: (phonelineId, caller, callee) =>
 		http.post('/sessions/calls', { phonelineId, caller, callee }),
 
-	getBlockAnonymous: phonelineId =>
-		http.get(`/${getUserId()}/phonelines/${phonelineId}/blockanonymous`),
+	getBlockAnonymous: (userId, phonelineId) =>
+		http.get(`/${userId}/phonelines/${phonelineId}/blockanonymous`),
 
-	setBlockAnonymous: (phonelineId, enabled, target) =>
-		http.put(`/${getUserId()}/phonelines/${phonelineId}/blockanonymous`, { enabled, target }),
+	setBlockAnonymous: (userId, phonelineId, enabled, target) =>
+		http.put(`/${userId}/phonelines/${phonelineId}/blockanonymous`, { enabled, target }),
 
 	getContacts: () =>
 		http.get('/contacts'),
@@ -188,23 +180,23 @@ export default (http, saveJWTToken, getUserId, onLogout = () => {}) => ({
 	importContactsFromGoogle: token =>
 		http.post('/contacts/import/google', { token }),
 
-	fetchSms: () =>
-		http.get(`/${getUserId()}/sms`),
+	fetchSms: userId =>
+		http.get(`/${userId}/sms`),
 
-	setSmsAlias: (smsId, alias) =>
-		http.put(`/${getUserId()}/sms/${smsId}`, { alias }),
+	setSmsAlias: (userId, smsId, alias) =>
+		http.put(`/${userId}/sms/${smsId}`, { alias }),
 
-	fetchSmsCallerIds: smsId =>
-		http.get(`/${getUserId()}/sms/${smsId}/callerids`),
+	fetchSmsCallerIds: (userId, smsId) =>
+		http.get(`/${userId}/sms/${smsId}/callerids`),
 
-	createSmsCallerId: (smsId, phonenumber) =>
-		http.post(`/${getUserId()}/sms/${smsId}/callerids`, { phonenumber }),
+	createSmsCallerId: (userId, smsId, phonenumber) =>
+		http.post(`/${userId}/sms/${smsId}/callerids`, { phonenumber }),
 
-	verifySmsCallerId: (smsId, callerId, verificationCode) =>
-		http.post(`/${getUserId()}/sms/${smsId}/callerids/${callerId}/verification`, { verificationCode }),
+	verifySmsCallerId: (userId, smsId, callerId, verificationCode) =>
+		http.post(`/${userId}/sms/${smsId}/callerids/${callerId}/verification`, { verificationCode }),
 
-	setActiveSmsCallerId: (smsId, callerId, defaultNumber) =>
-		http.put(`/${getUserId()}/sms/${smsId}/callerids/${callerId}`, { defaultNumber }),
+	setActiveSmsCallerId: (userId, smsId, callerId, defaultNumber) =>
+		http.put(`/${userId}/sms/${smsId}/callerids/${callerId}`, { defaultNumber }),
 
 	sendFax: (faxlineId, recipient, filename, base64Content) =>
 		http.post('/sessions/fax', { faxlineId, recipient, filename, base64Content }),
@@ -218,45 +210,45 @@ export default (http, saveJWTToken, getUserId, onLogout = () => {}) => ({
 	getBalance: () =>
 		http.get('/balance'),
 
-	getNotifications: () =>
-		http.get(`/${getUserId()}/notifications`),
+	getNotifications: userId =>
+		http.get(`/${userId}/notifications`),
 
-	deleteNotification: notificationId =>
-		http.del(`/${getUserId()}/notifications/${notificationId}`),
+	deleteNotification: (userId, notificationId) =>
+		http.del(`/${userId}/notifications/${notificationId}`),
 
-	createVoicemailEmailNotification: (voicemailId, email) =>
-		http.post(`/${getUserId()}/notifications/voicemail/email`, { voicemailId, email }),
+	createVoicemailEmailNotification: (userId, voicemailId, email) =>
+		http.post(`/${userId}/notifications/voicemail/email`, { voicemailId, email }),
 
-	createVoicemailSmsNotification: (voicemailId, number) =>
-		http.post(`/${getUserId()}/notifications/voicemail/sms`, { voicemailId, number }),
+	createVoicemailSmsNotification: (userId, voicemailId, number) =>
+		http.post(`/${userId}/notifications/voicemail/sms`, { voicemailId, number }),
 
-	createFaxEmailNotification: (faxlineId, email, direction) =>
-		http.post(`/${getUserId()}/notifications/fax/email`, { faxlineId, email, direction }),
+	createFaxEmailNotification: (userId, faxlineId, email, direction) =>
+		http.post(`/${userId}/notifications/fax/email`, { faxlineId, email, direction }),
 
-	createFaxSmsNotification: (faxlineId, number, direction) =>
-		http.post(`/${getUserId()}/notifications/fax/sms`, { faxlineId, number, direction }),
+	createFaxSmsNotification: (userId, faxlineId, number, direction) =>
+		http.post(`/${userId}/notifications/fax/sms`, { faxlineId, number, direction }),
 
-	createCallEmailNotification: (endpointId, email, direction, cause) =>
-		http.post(`/${getUserId()}/notifications/call/email`, { endpointId, email, direction, cause }),
+	createCallEmailNotification: (userId, endpointId, email, direction, cause) =>
+		http.post(`/${userId}/notifications/call/email`, { endpointId, email, direction, cause }),
 
-	createCallSmsNotification: (endpointId, number, direction, cause) =>
-		http.post(`/${getUserId()}/notifications/call/sms`, { endpointId, number, direction, cause }),
+	createCallSmsNotification: (userId, endpointId, number, direction, cause) =>
+		http.post(`/${userId}/notifications/call/sms`, { endpointId, number, direction, cause }),
 
-	createFaxReportNotification: (faxlineId, email) =>
-		http.post(`/${getUserId()}/notifications/fax/report`, { faxlineId, email }),
+	createFaxReportNotification: (userId, faxlineId, email) =>
+		http.post(`/${userId}/notifications/fax/report`, { faxlineId, email }),
 
 	fetchRestrictions: () =>
 		http.get('/restrictions'),
 
-	getSipgateIo: phonelineId =>
-		http.get(`/${getUserId()}/phonelines/${phonelineId}/sipgateio`),
+	getSipgateIo: (userId, phonelineId) =>
+		http.get(`/${userId}/phonelines/${phonelineId}/sipgateio`),
 
-	setSipgateIo: (phonelineId, sipgateIo) =>
-		http.put(`/${getUserId()}/phonelines/${phonelineId}/sipgateio`, sipgateIo),
+	setSipgateIo: (userId, phonelineId, sipgateIo) =>
+		http.put(`/${userId}/phonelines/${phonelineId}/sipgateio`, sipgateIo),
 
-	getSipgateIoLog: phonelineId =>
-		http.get(`/${getUserId()}/phonelines/${phonelineId}/sipgateio/log`),
+	getSipgateIoLog: (userId, phonelineId) =>
+		http.get(`/${userId}/phonelines/${phonelineId}/sipgateio/log`),
 
 	getUserInfo: () =>
-		http.get(`/authorization/userinfo`),
+		http.get('/authorization/userinfo'),
 });
