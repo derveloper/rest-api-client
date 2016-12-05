@@ -1,14 +1,11 @@
 import reduce from 'lodash/reduce';
 
 export default http => ({
-	createSession: (username, password) =>
-        http.post('/authorization/token', { username, password }),
+	getTranslations: locale =>
+		http.get(`/translations/${locale}`),
 
 	destroySession: () =>
 		http.del('/authorization/token'),
-
-	getTranslations: locale =>
-		http.getUnauthenticated(`/translations/${locale}`),
 
 	getFaxlines: userId =>
 		http.get(`/${userId}/faxlines`),
