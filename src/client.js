@@ -10,7 +10,10 @@ export default (http, saveJWTToken, getUserId, onLogout = () => {}) => ({
 	),
 
 	destroySession: () =>
-		http.del('/authorization/token'),
+		http.del('/authorization/token')
+			.then(() => {
+				onLogout();
+			}),
 
 	getTranslations: locale =>
 		http.getUnauthenticated(`/translations/${locale}`),
