@@ -204,6 +204,9 @@ export default http => ({
 	sendSms: (smsId, recipient, message) =>
 		http.post('/sessions/sms', { smsId, recipient, message }),
 
+	getAccount: () =>
+		http.get('/account'),
+
 	getBalance: () =>
 		http.get('/balance'),
 
